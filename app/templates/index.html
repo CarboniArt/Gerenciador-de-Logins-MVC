@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gerenciador de Contas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header-container">
+            <div>
+                <h1>Gerenciador de Contas</h1>
+                <div class="counter">Total de contas: {{ contas|length }}</div>
+            </div>
+            <button class="theme-toggle" id="themeToggle">🌓</button>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="search-container">
+            <form method="POST" action="{{ url_for('conta_bp.index') }}" style="flex-grow: 1; display: flex; gap: 12px;">
+                <input type="text" name="search" placeholder="Buscar por jogo ou email" value="{{ search }}">
+                <input type="submit" value="Buscar" class="btn btn-primary">
+            </form>
+            <div class="button-group">
+                <a href="{{ url_for('conta_bp.adicionar') }}" class="btn btn-primary">Adicionar Nova Conta</a>
+                <a href="{{ url_for('conta_bp.exportar') }}" class="btn btn-primary">Exportar TXT</a>
+            </div>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-email">Email</th>
+                        <th class="col-senha">Senha Ubisoft</th>
+                        <th class="col-senha">Senha Email</th>
+                        <th class="col-provedor">Provedor</th>
+                        <th class="col-jogos">Jogos</th>
+                        <th class="col-obs">Observações</th>
+                        <th class="col-actions">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for conta in contas %}
+                    <tr>
+                        <td class="copyable col-email" onclick="copyToClipboard(this, '{{ conta['email'] }}')">{{ conta['email'] }}</td>
+                        <td class="copyable password col-senha" onclick="copyToClipboard(this, '{{ conta['senha_ubisoft'] }}')">{{ conta['senha_ubisoft'] }}</td>
+                        <td class="copyable password col-senha" onclick="copyToClipboard(this, '{{ conta['senha_email'] }}')">{{ conta['senha_email'] }}</td>
+                        <td class="col-provedor">
+                            {% if conta['provedor'] %}<a href="{{ conta['provedor'] }}" target="_blank" class="provedor-link">Acessar</a>{% endif %}
+                        </td>
+                        <td class="copyable col-jogos" onclick="copyToClipboard(this, '{{ conta['jogos'] }}')">{{ conta['jogos'] }}</td>
+                        <td class="copyable col-obs" onclick="copyToClipboard(this, '{{ conta['observacoes'] }}')">{{ conta['observacoes'] }}</td>
+                        <td class="col-actions">
+                            <div class="action-buttons">
+                                <a href="{{ url_for('conta_bp.editar', id=conta['id']) }}" class="action-btn" title="Editar">✏️</a>
+                                <form method="POST" action="{{ url_for('conta_bp.excluir', id=conta['id']) }}" style="margin:0;">
+                                    <button type="submit" class="action-btn" title="Excluir">🗑️</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(element, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const notification = document.createElement('div');
+                notification.className = 'copy-notification';
+                notification.textContent = 'Copiado!';
+                element.appendChild(notification);
+                setTimeout(() => {
+                    element.removeChild(notification);
+                }, 1000);
+            });
+        }
+        const themeToggle = document.getElementById('themeToggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        const currentTheme = localStorage.getItem('theme') || (prefersDarkScheme.matches ? 'dark' : 'light');
+        if (currentTheme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            themeToggle.textContent = '🌞';
+        } else {
+            document.body.removeAttribute('data-theme');
+            themeToggle.textContent = '🌙';
+        }
+        themeToggle.addEventListener('click', () => {
+            if (document.body.getAttribute('data-theme') === 'dark') {
+                document.body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeToggle.textContent = '🌙';
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeToggle.textContent = '🌞';
+            }
+        });
+        document.querySelectorAll('.action-btn[type="submit"]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                if (!confirm(`Tem certeza que deseja excluir esta conta?\n\nEmail: ${button.closest('tr').querySelector('.col-email').textContent.trim()}`)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

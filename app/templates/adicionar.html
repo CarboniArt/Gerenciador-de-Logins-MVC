@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Adicionar Conta - Gerenciador Ubisoft</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container form-container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Adicionar Nova Conta</h1>
+            <button class="theme-toggle" id="themeToggle">🌓</button>
+        </div>
+        
+        <a href="{{ url_for('conta_bp.index') }}" class="btn btn-secondary">← Voltar</a>
+        
+        <form method="POST" style="margin-top: 30px;">
+            <div class="form-group">
+                <label for="email" class="required">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="senha_ubisoft" class="required">Senha Ubisoft:</label>
+                <input type="password" id="senha_ubisoft" name="senha_ubisoft" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="senha_email" class="required">Senha do Email:</label>
+                <input type="password" id="senha_email" name="senha_email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="provedor">Provedor (URL):</label>
+                <input type="url" id="provedor" name="provedor" placeholder="https://...">
+            </div>
+            
+            <div class="form-group">
+                <label for="jogos">Jogos:</label>
+                <textarea 
+                    id="jogos" 
+                    name="jogos" 
+                    placeholder="Cole sua lista de jogos aqui (um por linha)"
+                    rows="6"
+                ></textarea>
+                <div class="dica">Dica: Cole uma lista com um jogo por linha</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="observacoes">Observações:</label>
+                <textarea id="observacoes" name="observacoes"></textarea>
+            </div>
+            
+            <div class="actions">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                <a href="{{ url_for('conta_bp.index') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        const currentTheme = localStorage.getItem('theme') || (prefersDarkScheme.matches ? 'dark' : 'light');
+        if (currentTheme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            themeToggle.textContent = '🌞';
+        } else {
+            document.body.removeAttribute('data-theme');
+            themeToggle.textContent = '🌙';
+        }
+        themeToggle.addEventListener('click', () => {
+            if (document.body.getAttribute('data-theme') === 'dark') {
+                document.body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeToggle.textContent = '🌙';
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeToggle.textContent = '🌞';
+            }
+        });
+    </script>
+</body>
+</html>
