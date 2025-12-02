@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <title>Gerenciador de Contas</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -24,12 +25,12 @@
 
         <div class="search-container">
             <form method="POST" action="{{ url_for('conta_bp.index') }}" style="flex-grow: 1; display: flex; gap: 12px;">
-                <input type="text" name="search" placeholder="Buscar por jogo ou email" value="{{ search }}">
+                <input type="text" name="search" placeholder="Buscar por email ou observação" value="{{ search }}">
                 <input type="submit" value="Buscar" class="btn btn-primary">
             </form>
-            <div class="button-group">
+            <div style="display:flex; gap:12px;">
                 <a href="{{ url_for('conta_bp.adicionar') }}" class="btn btn-primary">Adicionar Nova Conta</a>
-                <a href="{{ url_for('conta_bp.exportar') }}" class="btn btn-primary">Exportar TXT</a>
+                <a href="{{ url_for('conta_bp.exportar') }}" class="btn btn-secondary">Exportar TXT</a>
             </div>
         </div>
         
@@ -37,28 +38,26 @@
             <table>
                 <thead>
                     <tr>
-                        <th class="col-email">Email</th>
-                        <th class="col-senha">Senha Ubisoft</th>
-                        <th class="col-senha">Senha Email</th>
-                        <th class="col-provedor">Provedor</th>
-                        <th class="col-jogos">Jogos</th>
-                        <th class="col-obs">Observações</th>
-                        <th class="col-actions">Ações</th>
+                        <th style="width:25%;">Email</th>
+                        <th style="width:15%;">Senha</th>
+                        <th style="width:18%;">Provedor</th>
+                        <th style="width:30%;">Observações</th>
+                        <th style="width:12%;">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for conta in contas %}
                     <tr>
-                        <td class="copyable col-email" onclick="copyToClipboard(this, '{{ conta['email'] }}')">{{ conta['email'] }}</td>
-                        <td class="copyable password col-senha" onclick="copyToClipboard(this, '{{ conta['senha_ubisoft'] }}')">{{ conta['senha_ubisoft'] }}</td>
-                        <td class="copyable password col-senha" onclick="copyToClipboard(this, '{{ conta['senha_email'] }}')">{{ conta['senha_email'] }}</td>
-                        <td class="col-provedor">
-                            {% if conta['provedor'] %}<a href="{{ conta['provedor'] }}" target="_blank" class="provedor-link">Acessar</a>{% endif %}
+                        <td class="copyable" onclick="copyToClipboard(this, '{{ conta['email'] }}')">{{ conta['email'] }}</td>
+                        <td class="copyable password" onclick="copyToClipboard(this, '{{ conta['senha'] }}')">{{ conta['senha'] }}</td>
+                        <td>
+                            {% if conta['provedor'] %}
+                            <a href="{{ conta['provedor'] }}" target="_blank" class="provedor-link">Acessar</a>
+                            {% endif %}
                         </td>
-                        <td class="copyable col-jogos" onclick="copyToClipboard(this, '{{ conta['jogos'] }}')">{{ conta['jogos'] }}</td>
-                        <td class="copyable col-obs" onclick="copyToClipboard(this, '{{ conta['observacoes'] }}')">{{ conta['observacoes'] }}</td>
-                        <td class="col-actions">
-                            <div class="action-buttons">
+                        <td class="copyable" onclick="copyToClipboard(this, '{{ conta['observacoes'] }}')">{{ conta['observacoes'] }}</td>
+                        <td>
+                            <div style="display:flex; gap:8px; align-items:center;">
                                 <a href="{{ url_for('conta_bp.editar', id=conta['id']) }}" class="action-btn" title="Editar">✏️</a>
                                 <form method="POST" action="{{ url_for('conta_bp.excluir', id=conta['id']) }}" style="margin:0;">
                                     <button type="submit" class="action-btn" title="Excluir">🗑️</button>
@@ -74,16 +73,18 @@
 
     <script>
         function copyToClipboard(element, text) {
-            navigator.clipboard.writeText(text).then(() => {
+            navigator.clipboard.writeText(text || '').then(() => {
                 const notification = document.createElement('div');
                 notification.className = 'copy-notification';
                 notification.textContent = 'Copiado!';
+                element.style.position = 'relative';
                 element.appendChild(notification);
                 setTimeout(() => {
-                    element.removeChild(notification);
+                    if (element.contains(notification)) element.removeChild(notification);
                 }, 1000);
             });
         }
+
         const themeToggle = document.getElementById('themeToggle');
         const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
         const currentTheme = localStorage.getItem('theme') || (prefersDarkScheme.matches ? 'dark' : 'light');
@@ -105,9 +106,12 @@
                 themeToggle.textContent = '🌞';
             }
         });
-        document.querySelectorAll('.action-btn[type="submit"]').forEach(button => {
+
+        document.querySelectorAll('form[action*="excluir"] button[type="submit"]').forEach(button => {
             button.addEventListener('click', (e) => {
-                if (!confirm(`Tem certeza que deseja excluir esta conta?\n\nEmail: ${button.closest('tr').querySelector('.col-email').textContent.trim()}`)) {
+                const row = button.closest('tr');
+                const email = row ? row.querySelector('td')?.textContent.trim() : '';
+                if (!confirm(`Tem certeza que deseja excluir esta conta?\n\nEmail: ${email}`)) {
                     e.preventDefault();
                 }
             });
