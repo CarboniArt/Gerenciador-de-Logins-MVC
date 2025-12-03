@@ -19,13 +19,15 @@ def login_required(f):
 @conta_bp.route("/", methods=["GET", "POST"])
 @login_required 
 def index():
+    username = session['username'] 
     search = request.form.get("search", "")
-    contas = db.get_all(search_term=search)
+    contas = db.get_all(username=username, search_term=search) 
     return render_template("index.html", contas=contas, search=search)
 
 @conta_bp.route("/adicionar", methods=["GET", "POST"])
 @login_required 
 def adicionar():
+    username = session['username'] 
     if request.method == "POST":
         data = {
             "email": request.form.get("email"),
@@ -39,7 +41,7 @@ def adicionar():
             flash("Preencha todos os campos obrigatórios.", "error")
             return render_template("adicionar.html", data=data)
 
-        db.create(data)
+        db.create(data, username) 
         flash("Conta adicionada com sucesso!", "success")
         return redirect(url_for("conta_bp.index"))
 
@@ -48,10 +50,11 @@ def adicionar():
 @conta_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required 
 def editar(id):
-    conta = db.get_by_id(id)
+    username = session['username'] 
+    conta = db.get_by_id(id, username) 
 
     if not conta:
-        flash("Conta não encontrada.", "error")
+        flash("Conta não encontrada ou você não tem permissão para editar.", "error") 
         return redirect(url_for("conta_bp.index"))
 
     if request.method == "POST":
@@ -67,7 +70,7 @@ def editar(id):
             flash("Preencha todos os campos obrigatórios.", "error")
             return render_template("editar.html", conta=data)
 
-        db.update(id, data)
+        db.update(id, data, username) 
         flash("Conta atualizada com sucesso!", "success")
         return redirect(url_for("conta_bp.index"))
 
@@ -76,14 +79,16 @@ def editar(id):
 @conta_bp.route("/excluir/<int:id>", methods=["POST"])
 @login_required 
 def excluir(id):
-    db.delete(id)
+    username = session['username'] 
+    db.delete(id, username) 
     flash("Conta excluída com sucesso!", "success")
     return redirect(url_for("conta_bp.index"))
 
 @conta_bp.route("/exportar")
 @login_required 
 def exportar():
-    contas = db.get_all()
+    username = session['username'] 
+    contas = db.get_all(username=username) 
     txt = ""
 
     for c in contas:
