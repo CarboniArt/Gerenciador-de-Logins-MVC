@@ -1,17 +1,30 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, Response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, Response, session
 from app.models.conta_model import ContaModel
+from functools import wraps 
 
 conta_bp = Blueprint("conta_bp", __name__, template_folder="../templates")
 
 db = ContaModel()
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session:
+            flash('Você precisa estar logado para acessar esta página.', 'error')
+
+            return redirect(url_for('usuario_bp.login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
 @conta_bp.route("/", methods=["GET", "POST"])
+@login_required 
 def index():
     search = request.form.get("search", "")
     contas = db.get_all(search_term=search)
     return render_template("index.html", contas=contas, search=search)
 
 @conta_bp.route("/adicionar", methods=["GET", "POST"])
+@login_required 
 def adicionar():
     if request.method == "POST":
         data = {
@@ -33,6 +46,7 @@ def adicionar():
     return render_template("adicionar.html")
 
 @conta_bp.route("/editar/<int:id>", methods=["GET", "POST"])
+@login_required 
 def editar(id):
     conta = db.get_by_id(id)
 
@@ -60,12 +74,14 @@ def editar(id):
     return render_template("editar.html", conta=conta)
 
 @conta_bp.route("/excluir/<int:id>", methods=["POST"])
+@login_required 
 def excluir(id):
     db.delete(id)
     flash("Conta excluída com sucesso!", "success")
     return redirect(url_for("conta_bp.index"))
 
 @conta_bp.route("/exportar")
+@login_required 
 def exportar():
     contas = db.get_all()
     txt = ""

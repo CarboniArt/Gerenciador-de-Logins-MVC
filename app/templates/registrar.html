@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Registrar-se - Gerenciador de Contas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container form-container">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+            <h1>Criar Conta</h1>
+            <button class="theme-toggle" id="themeToggle">🌓</button>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="flash {{ category }}" style="margin-bottom: 24px; margin-top: 10px;">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" style="margin-top: 24px;">
+            <div class="form-group">
+                <label for="username" class="required">Usuário:</label>
+                <input type="text" id="username" name="username" required placeholder="Escolha um nome de usuário">
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="required">Senha:</label>
+                <input type="password" id="password" name="password" required placeholder="Sua senha">
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password" class="required">Confirmar Senha:</label>
+                <input type="password" id="confirm_password" name="confirm_password" required placeholder="Repita sua senha">
+            </div>
+
+            <div style="display:flex; flex-direction: column; gap:12px; margin-top:24px;">
+                <button type="submit" class="btn btn-primary">Registrar</button>
+                <a href="{{ url_for('usuario_bp.login') }}" class="btn btn-secondary" style="text-align: center;">Já possui conta? Faça Login</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+        const current = localStorage.getItem('theme') || (prefersDark.matches ? 'dark' : 'light');
+
+        if (current === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            themeToggle.textContent = '🌞';
+        } else {
+            themeToggle.textContent = '🌙';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            if (document.body.getAttribute('data-theme') === 'dark') {
+                document.body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeToggle.textContent = '🌙';
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeToggle.textContent = '🌞';
+            }
+        });
+    </script>
+</body>
+</html>

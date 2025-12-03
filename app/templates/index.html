@@ -10,9 +10,21 @@
         <div class="header-container">
             <div>
                 <h1>Gerenciador de Contas</h1>
+                {% if session.get('username') %}
                 <div class="counter">Total de contas: {{ contas|length }}</div>
+                {% endif %}
             </div>
-            <button class="theme-toggle" id="themeToggle">🌓</button>
+            
+            <div style="display: flex; align-items: center; gap: 15px;">
+                {% if session.get('username') %}
+                    <span class="user-info">Bem-vindo, <strong>{{ session['username'] }}</strong></span>
+                    <a href="{{ url_for('usuario_bp.logout') }}" class="btn btn-secondary" style="font-size: 0.9rem; padding: 8px 12px; border-color: #d94848; color: #d94848;">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('usuario_bp.login') }}" class="btn btn-primary">Entrar</a>
+                    <a href="{{ url_for('usuario_bp.registrar') }}" class="btn btn-secondary">Registrar</a>
+                {% endif %}
+                <button class="theme-toggle" id="themeToggle">🌓</button>
+            </div>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -23,52 +35,64 @@
         {% endif %}
         {% endwith %}
 
-        <div class="search-container">
-            <form method="POST" action="{{ url_for('conta_bp.index') }}" style="flex-grow: 1; display: flex; gap: 12px;">
-                <input type="text" name="search" placeholder="Buscar por email ou observação" value="{{ search }}">
-                <input type="submit" value="Buscar" class="btn btn-primary">
-            </form>
-            <div style="display:flex; gap:12px;">
-                <a href="{{ url_for('conta_bp.adicionar') }}" class="btn btn-primary">Adicionar Nova Conta</a>
-                <a href="{{ url_for('conta_bp.exportar') }}" class="btn btn-secondary">Exportar TXT</a>
+        {% if session.get('username') %}
+            
+            <div class="search-container">
+                <form method="POST" action="{{ url_for('conta_bp.index') }}" style="flex-grow: 1; display: flex; gap: 12px;">
+                    <input type="text" name="search" placeholder="Buscar por email ou observação" value="{{ search }}">
+                    <input type="submit" value="Buscar" class="btn btn-primary">
+                </form>
+                <div style="display:flex; gap:12px;">
+                    <a href="{{ url_for('conta_bp.adicionar') }}" class="btn btn-primary">Adicionar Nova Conta</a>
+                    <a href="{{ url_for('conta_bp.exportar') }}" class="btn btn-secondary">Exportar TXT</a>
+                </div>
             </div>
-        </div>
-        
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:25%;">Email</th>
-                        <th style="width:15%;">Senha</th>
-                        <th style="width:18%;">Provedor</th>
-                        <th style="width:30%;">Observações</th>
-                        <th style="width:12%;">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for conta in contas %}
-                    <tr>
-                        <td class="copyable" onclick="copyToClipboard(this, '{{ conta['email'] }}')">{{ conta['email'] }}</td>
-                        <td class="copyable password" onclick="copyToClipboard(this, '{{ conta['senha'] }}')">{{ conta['senha'] }}</td>
-                        <td>
-                            {% if conta['provedor'] %}
-                            <a href="{{ conta['provedor'] }}" target="_blank" class="provedor-link">Acessar</a>
-                            {% endif %}
-                        </td>
-                        <td class="copyable" onclick="copyToClipboard(this, '{{ conta['observacoes'] }}')">{{ conta['observacoes'] }}</td>
-                        <td>
-                            <div style="display:flex; gap:8px; align-items:center;">
-                                <a href="{{ url_for('conta_bp.editar', id=conta['id']) }}" class="action-btn" title="Editar">✏️</a>
-                                <form method="POST" action="{{ url_for('conta_bp.excluir', id=conta['id']) }}" style="margin:0;">
-                                    <button type="submit" class="action-btn" title="Excluir">🗑️</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+            
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:25%;">Email</th>
+                            <th style="width:15%;">Senha Ubisoft</th>
+                            <th style="width:18%;">Provedor</th>
+                            <th style="width:30%;">Observações</th>
+                            <th style="width:12%;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for conta in contas %}
+                        <tr>
+                            <td class="copyable" onclick="copyToClipboard(this, '{{ conta['email'] }}')">{{ conta['email'] }}</td>
+                            <td class="copyable password" onclick="copyToClipboard(this, '{{ conta['senha_ubisoft'] }}')">
+                                Clique para Copiar
+                            </td>
+                            <td>
+                                {% if conta['provedor'] %}
+                                <a href="{{ conta['provedor'] }}" target="_blank" class="provedor-link">Acessar</a>
+                                {% endif %}
+                            </td>
+                            <td class="copyable" onclick="copyToClipboard(this, '{{ conta['observacoes'] }}')">{{ conta['observacoes'] }}</td>
+                            <td>
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <a href="{{ url_for('conta_bp.editar', id=conta['id']) }}" class="action-btn" title="Editar">✏️</a>
+                                    <form method="POST" action="{{ url_for('conta_bp.excluir', id=conta['id']) }}" style="margin:0;">
+                                        <button type="submit" class="action-btn" title="Excluir">🗑️</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        {% else %}
+            <div style="text-align: center; margin-top: 60px; padding: 40px; background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);">
+                <h2 style="margin-top: 0;">Bem-vindo ao Gerenciador</h2>
+                <p style="color: var(--secondary-color); margin-bottom: 24px;">Faça login para acessar suas contas salvas com segurança.</p>
+                <a href="{{ url_for('usuario_bp.login') }}" class="btn btn-primary" style="font-size: 1.1rem; padding: 12px 24px;">Fazer Login</a>
+            </div>
+        {% endif %}
     </div>
 
     <script>
@@ -107,15 +131,24 @@
             }
         });
 
-        document.querySelectorAll('form[action*="excluir"] button[type="submit"]').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const row = button.closest('tr');
-                const email = row ? row.querySelector('td')?.textContent.trim() : '';
-                if (!confirm(`Tem certeza que deseja excluir esta conta?\n\nEmail: ${email}`)) {
-                    e.preventDefault();
-                }
+        // Só ativa os listeners de exclusão se a tabela existir (usuário logado)
+        const deleteButtons = document.querySelectorAll('form[action*="excluir"] button[type="submit"]');
+        if (deleteButtons) {
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const row = button.closest('tr');
+                    const email = row ? row.querySelector('td')?.textContent.trim() : '';
+                    if (!confirm(`Tem certeza que deseja excluir esta conta?\n\nEmail: ${email}`)) {
+                        e.preventDefault();
+                    }
+                });
             });
+        }
+        
+        document.querySelectorAll('td.password').forEach(cell => {
+            cell.textContent = 'Clique para Copiar';
         });
+
     </script>
 </body>
 </html>
