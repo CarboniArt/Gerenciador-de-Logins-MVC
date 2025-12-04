@@ -40,7 +40,7 @@ def login():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        user = db_user.get_user_by_username(username)
+        user = db_user.get_user_by_username_or_email(username)
         
         if user and db_user.check_password(user, password):
             session['username'] = user['username']

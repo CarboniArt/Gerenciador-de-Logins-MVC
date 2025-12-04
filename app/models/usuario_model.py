@@ -50,6 +50,15 @@ class UsuarioModel:
         user = conn.execute("SELECT id, username, email, password_hash FROM usuarios WHERE email = ?", (email,)).fetchone()
         conn.close()
         return user
+    
+    def get_user_by_username_or_email(self, login_input):
+        conn = self._get_db_connection()
+        user = conn.execute(
+            "SELECT * FROM usuarios WHERE username = ? OR email = ?", 
+            (login_input, login_input)
+        ).fetchone()
+        conn.close()
+        return user
 
     def check_password(self, user, password):
         if user and check_password_hash(user['password_hash'], password):
