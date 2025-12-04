@@ -18,19 +18,20 @@ class UsuarioModel:
                 CREATE TABLE IF NOT EXISTS usuarios (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT UNIQUE NOT NULL,
+                    email TEXT UNIQUE NOT NULL,  
                     password_hash TEXT NOT NULL
                 )
             """)
             conn.commit()
 
-    def create_user(self, username, password):
+    def create_user(self, username, email, password): 
         hashed_password = generate_password_hash(password)
         conn = self._get_db_connection()
         try:
             conn.execute("""
-                INSERT INTO usuarios (username, password_hash)
-                VALUES (?, ?)
-            """, (username, hashed_password))
+                INSERT INTO usuarios (username, email, password_hash) 
+                VALUES (?, ?, ?)
+            """, (username, email, hashed_password)) 
             conn.commit()
             return True
         except sqlite3.IntegrityError:
@@ -41,6 +42,12 @@ class UsuarioModel:
     def get_user_by_username(self, username):
         conn = self._get_db_connection()
         user = conn.execute("SELECT * FROM usuarios WHERE username = ?", (username,)).fetchone()
+        conn.close()
+        return user
+    
+    def get_user_by_email(self, email):
+        conn = self._get_db_connection()
+        user = conn.execute("SELECT id, username, email, password_hash FROM usuarios WHERE email = ?", (email,)).fetchone()
         conn.close()
         return user
 

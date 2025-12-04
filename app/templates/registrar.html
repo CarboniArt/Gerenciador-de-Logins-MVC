@@ -23,7 +23,12 @@
         <form method="POST" style="margin-top: 24px;">
             <div class="form-group">
                 <label for="username" class="required">Usuário:</label>
-                <input type="text" id="username" name="username" required placeholder="Escolha um nome de usuário">
+                <input type="text" id="username" name="username" required placeholder="Escolha um nome de usuário" value="{{ username or '' }}"> 
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="required">E-mail:</label>
+                <input type="email" id="email" name="email" required placeholder="Seu e-mail" value="{{ email or '' }}"> 
             </div>
 
             <div class="form-group">
