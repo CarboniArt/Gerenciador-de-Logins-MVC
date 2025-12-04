@@ -40,8 +40,8 @@ class ContaModel:
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS contas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL,
-                    senha_ubisoft TEXT NOT NULL, senha_email TEXT NOT NULL,
-                    provedor TEXT, jogos TEXT, observacoes TEXT, 
+                    senha_login TEXT NOT NULL, senha_email TEXT NOT NULL,
+                    provedor TEXT, observacoes TEXT, 
                     is_encrypted INTEGER DEFAULT 0,
                     username TEXT NOT NULL 
                 )
@@ -49,15 +49,11 @@ class ContaModel:
             conn.commit()
             
             cursor.execute("PRAGMA table_info(contas)")
-            columns = [col[1] for col in cursor.fetchall()]
-            
-            # Adiciona colunas se não existirem (para migração de DBs antigos)
+            columns = [col[1] for col in cursor.fetchall()]            
             if 'is_encrypted' not in columns:
                 cursor.execute("ALTER TABLE contas ADD COLUMN is_encrypted INTEGER DEFAULT 0")
                 conn.commit()
             if 'username' not in columns:
-                 # Adiciona a coluna username com um valor padrão para contas existentes
-                 # Você deve substituir 'admin' pelo username do seu primeiro usuário se precisar manter contas antigas
                 cursor.execute("ALTER TABLE contas ADD COLUMN username TEXT DEFAULT 'admin'")
                 conn.commit()
 
@@ -70,13 +66,13 @@ class ContaModel:
         for conta in contas:
             try:
                 cursor.execute("""
-                    UPDATE contas SET email = ?, senha_ubisoft = ?, senha_email = ?,
-                    provedor = ?, jogos = ?, observacoes = ?, is_encrypted = 1
+                    UPDATE contas SET email = ?, senha_login = ?, senha_email = ?,
+                    provedor = ?, observacoes = ?, is_encrypted = 1
                     WHERE id = ?
                 """, (
-                    self._encrypt(conta['email']), self._encrypt(conta['senha_ubisoft']),
+                    self._encrypt(conta['email']), self._encrypt(conta['senha_login']),
                     self._encrypt(conta['senha_email']), self._encrypt(conta['provedor']),
-                    self._encrypt(conta['jogos']), self._encrypt(conta['observacoes']),
+                    self._encrypt(conta('observacoes')),
                     conta['id']
                 ))
                 conn.commit()
@@ -97,15 +93,14 @@ class ContaModel:
         for conta in contas_db:
             decrypted_conta = {
                 'id': conta['id'], 'email': self._decrypt(conta['email']),
-                'senha_ubisoft': self._decrypt(conta['senha_ubisoft']),
+                'senha_login': self._decrypt(conta['senha_login']),
                 'senha_email': self._decrypt(conta['senha_email']),
                 'provedor': self._decrypt(conta['provedor']),
-                'jogos': self._decrypt(conta['jogos']),
                 'observacoes': self._decrypt(conta['observacoes'])
             }
             if search_term:
-                if (search_term.lower() in (decrypted_conta['jogos'] or '').lower() or
-                    search_term.lower() in (decrypted_conta['email'] or '').lower()):
+                if (search_term.lower() in (decrypted_conta['email'] or '').lower() or
+                    search_term.lower() in (decrypted_conta['observacoes'] or '').lower()):
                     decrypted_contas.append(decrypted_conta)
             else:
                 decrypted_contas.append(decrypted_conta)
@@ -118,22 +113,21 @@ class ContaModel:
         if not conta_db: return None
         return {
             'id': conta_db['id'], 'email': self._decrypt(conta_db['email']),
-            'senha_ubisoft': self._decrypt(conta_db['senha_ubisoft']),
+            'senha_login': self._decrypt(conta_db['senha_login']),
             'senha_email': self._decrypt(conta_db['senha_email']),
             'provedor': self._decrypt(conta_db['provedor']),
-            'jogos': self._decrypt(conta_db['jogos']),
             'observacoes': self._decrypt(conta_db['observacoes'])
         }
 
     def create(self, data, username):
         conn = self._get_db_connection()
         conn.execute("""
-            INSERT INTO contas (email, senha_ubisoft, senha_email, provedor, jogos, observacoes, is_encrypted, username)
-            VALUES (?, ?, ?, ?, ?, ?, 1, ?)
+            INSERT INTO contas (email, senha_login, senha_email, provedor, observacoes, is_encrypted, username)
+            VALUES (?, ?, ?, ?, ?, 1, ?)
         """, (
-            self._encrypt(data['email']), self._encrypt(data['senha_ubisoft']),
+            self._encrypt(data['email']), self._encrypt(data['senha_login']),
             self._encrypt(data['senha_email']), self._encrypt(data.get('provedor')),
-            self._encrypt(data.get('jogos')), self._encrypt(data.get('observacoes')),
+            self._encrypt(data.get('observacoes')),
             username 
         ))
         conn.commit()
@@ -142,13 +136,13 @@ class ContaModel:
     def update(self, conta_id, data, username):
         conn = self._get_db_connection()
         conn.execute("""
-            UPDATE contas SET email = ?, senha_ubisoft = ?, senha_email = ?,
-            provedor = ?, jogos = ?, observacoes = ?, is_encrypted = 1
+            UPDATE contas SET email = ?, senha_login = ?, senha_email = ?,
+            provedor = ?, observacoes = ?, is_encrypted = 1
             WHERE id = ? AND username = ?
         """, (
-            self._encrypt(data['email']), self._encrypt(data['senha_ubisoft']),
+            self._encrypt(data['email']), self._encrypt(data['senha_login']),
             self._encrypt(data['senha_email']), self._encrypt(data.get('provedor')),
-            self._encrypt(data.get('jogos')), self._encrypt(data.get('observacoes')),
+            self._encrypt(data.get('observacoes')),
             conta_id, username 
         ))
         conn.commit()

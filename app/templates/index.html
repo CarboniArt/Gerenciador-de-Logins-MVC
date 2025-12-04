@@ -53,7 +53,7 @@
                     <thead>
                         <tr>
                             <th style="width:25%;">Email</th>
-                            <th style="width:15%;">Senha Ubisoft</th>
+                            <th style="width:15%;">Senha Conta</th>
                             <th style="width:18%;">Provedor</th>
                             <th style="width:30%;">Observações</th>
                             <th style="width:12%;">Ações</th>
@@ -63,7 +63,7 @@
                         {% for conta in contas %}
                         <tr>
                             <td class="copyable" onclick="copyToClipboard(this, '{{ conta['email'] }}')">{{ conta['email'] }}</td>
-                            <td class="copyable password" onclick="copyToClipboard(this, '{{ conta['senha_ubisoft'] }}')">
+                            <td class="copyable password" onclick="copyToClipboard(this, '{{ conta['senha_login'] }}')">
                                 Clique para Copiar
                             </td>
                             <td>
@@ -131,7 +131,6 @@
             }
         });
 
-        // Só ativa os listeners de exclusão se a tabela existir (usuário logado)
         const deleteButtons = document.querySelectorAll('form[action*="excluir"] button[type="submit"]');
         if (deleteButtons) {
             deleteButtons.forEach(button => {
