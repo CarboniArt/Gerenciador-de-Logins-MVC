@@ -3,3 +3,4 @@ secret.key
 app/models/__pycache__/conta_model.cpython-313.pyc
 app/controllers/__pycache__/conta_controller.cpython-313.pyc
 app/__pycache__/__init__.cpython-313.pyc
+.venv

@@ -31,13 +31,13 @@ def adicionar():
     if request.method == "POST":
         data = {
             "email": request.form.get("email"),
-            "senha_ubisoft": request.form.get("senha_ubisoft"),
+            "senha_login": request.form.get("senha_login"),
             "senha_email": request.form.get("senha_email"),
             "provedor": request.form.get("provedor"),
             "observacoes": request.form.get("observacoes")
         }
 
-        if not data["email"] or not data["senha_ubisoft"] or not data["senha_email"]:
+        if not data["email"] or not data["senha_login"] or not data["senha_email"]:
             flash("Preencha todos os campos obrigatórios.", "error")
             return render_template("adicionar.html", data=data)
 
@@ -60,13 +60,13 @@ def editar(id):
     if request.method == "POST":
         data = {
             "email": request.form.get("email"),
-            "senha_ubisoft": request.form.get("senha_ubisoft"),
+            "senha_login": request.form.get("senha_login"),
             "senha_email": request.form.get("senha_email"),
             "provedor": request.form.get("provedor"),
             "observacoes": request.form.get("observacoes")
         }
 
-        if not data["email"] or not data["senha_ubisoft"] or not data["senha_email"]:
+        if not data["email"] or not data["senha_login"] or not data["senha_email"]:
             flash("Preencha todos os campos obrigatórios.", "error")
             return render_template("editar.html", conta=data)
 
@@ -95,7 +95,7 @@ def exportar():
         txt += (
             f"ID: {c['id']}\n"
             f"Email: {c['email']}\n"
-            f"Senha Ubisoft: {c['senha_ubisoft']}\n"
+            f"Senha Login: {c['senha_login']}\n"
             f"Senha Email: {c['senha_email']}\n"
             f"Provedor: {c.get('provedor') or 'N/A'}\n"
             f"Observações:\n{c.get('observacoes') or 'Nenhuma'}\n"
@@ -105,5 +105,5 @@ def exportar():
     return Response(
         txt,
         mimetype="text/plain",
-        headers={"Content-disposition": "attachment; filename=contas_ubisoft.txt"}
+        headers={"Content-disposition": "attachment; filename=contas.txt"}
     )
