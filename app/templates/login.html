@@ -2,47 +2,42 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Adicionar Conta - Gerenciador de Contas</title>
+    <title>Login - Gerenciador de Contas</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container form-container">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
-            <h1>Adicionar Nova Conta</h1>
+            <h1>Login</h1>
             <button class="theme-toggle" id="themeToggle">🌓</button>
         </div>
 
-        <a href="{{ url_for('conta_bp.index') }}" class="btn btn-secondary">← Voltar</a>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash {{ category }}" style="margin-bottom: 24px; margin-top: 10px;">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
 
         <form method="POST" style="margin-top: 24px;">
             <div class="form-group">
-                <label for="email" class="required">Email:</label>
-                <input type="email" id="email" name="email" required>
+                <label for="username" class="required">Usuário/Email:</label>
+                <input type="text" id="username" name="username" required placeholder="Seu nome de usuário">
             </div>
 
             <div class="form-group">
-                <label for="senha_login" class="required">Senha da Conta:</label>
-                <input type="password" id="senha_login" name="senha_login" required>
+                <label for="password" class="required">Senha:</label>
+                <input type="password" id="password" name="password" required placeholder="Sua senha">
             </div>
+            
+            <a href="{{ url_for('usuario_bp.forgot_password') }}" style="text-align: right; margin-top: -10px; margin-bottom: 20px; display: block;">Esqueci minha senha?</a>
 
-            <div class="form-group">
-                <label for="senha_email" class="required">Senha do Email:</label>
-                <input type="password" id="senha_email" name="senha_email" required>
-            </div>
 
-            <div class="form-group">
-                <label for="provedor">Provedor (URL):</label>
-                <input type="url" id="provedor" name="provedor" placeholder="https://...">
-            </div>
-
-            <div class="form-group">
-                <label for="observacoes">Observações:</label>
-                <textarea id="observacoes" name="observacoes" rows="5"></textarea>
-            </div>
-
-            <div style="display:flex; gap:12px; margin-top:18px;">
-                <button type="submit" class="btn btn-primary">Salvar</button>
-                <a href="{{ url_for('conta_bp.index') }}" class="btn btn-secondary">Cancelar</a>
+            <div style="display:flex; flex-direction: column; gap:12px; margin-top:24px;">
+                <button type="submit" class="btn btn-primary">Entrar</button>
+                
+                <a href="{{ url_for('usuario_bp.registrar') }}" class="btn btn-secondary" style="text-align: center;">Não tem conta? Registre-se</a>
             </div>
         </form>
     </div>
