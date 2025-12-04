@@ -47,6 +47,38 @@ h1 {
     font-weight: 600;
 }
 
+@keyframes pulseColorLight {
+    0%, 100% {
+        color: var(--primary-color);
+        text-shadow: 0 0 5px rgba(66, 93, 138, 0.5); 
+    }
+    50% {
+        color: var(--text-color);
+        text-shadow: none;
+    }
+}
+
+.animated-title {
+    animation: pulseColorLight 3s infinite ease-in-out;
+    display: inline-block; 
+    font-weight: 600; 
+}
+
+[data-theme='dark'] .animated-title {
+    animation: pulseColorDark 3s infinite ease-in-out;
+}
+
+@keyframes pulseColorDark {
+    0%, 100% {
+        color: var(--primary-color); 
+        text-shadow: 0 0 8px rgba(138, 163, 209, 0.7); 
+    }
+    50% {
+        color: var(--text-color); 
+        text-shadow: none;
+    }
+}
+
 .counter {
     font-size: 0.9rem;
     color: var(--secondary-color);
